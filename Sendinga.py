@@ -76,7 +76,7 @@ class Lover(telepot.aio.helper.ChatHandler):
             
             except Exception as e:
                 print(e)
-            if i+fk[1]-5 < 50:
+            if i+fk[1]-5 < fk[2]-2:
                 await self.sender.sendMessage('/more  بیشتر')
             else:
                 await self.sender.sendMessage('فیدهای این موضوع به اتمام رسید\n برای ادامه مجددا شروع کنید /start')
