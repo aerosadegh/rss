@@ -5,7 +5,7 @@ rss Feed test on farsnews.com by python
 
 ## in Shell#1
 
-`python Feeds.py`   #Update Feeds
+`python Feeds.py`   #Update Feeds every 10 min
 
 and
 
