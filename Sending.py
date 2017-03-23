@@ -38,8 +38,7 @@ class Lover(telepot.helper.ChatHandler):
         super(Lover, self).__init__(*args, **kwargs)
 
         # Retrieve from database
-        from tele import Feeds
-        global propose_records, RSSFLink, Feeds
+        global propose_records, RSSFLink
         if self.id in propose_records:
             self._count, self._edit_msg_ident = propose_records[self.id]
             self._editor = telepot.helper.Editor(self.bot, self._edit_msg_ident) if self._edit_msg_ident else None
@@ -62,7 +61,8 @@ class Lover(telepot.helper.ChatHandler):
             self._edit_msg_ident = None
 
     def on_chat_message(self, msg):
-        global RSSFLink, fk, Feeds
+        global RSSFLink, fk
+        from tele import Feeds
         if msg['text'] == '/more':
             ff = Feeds[fk[0]][fk[1]:fk[1]+5]
             fk[1] = fk[1]+5
@@ -78,9 +78,9 @@ class Lover(telepot.helper.ChatHandler):
             except Exception as e:
                 print(e)
             if i+fk[1]-5 < fk[2]-2:
-                self.sender.sendMessage('/more  بیشتر')
+                self.sender.sendMessage('/more  بیشتر\n\n/start  شروع')
             else:
-                self.sender.sendMessage('فیدهای این موضوع به اتمام رسید\n برای ادامه مجددا شروع کنید /start')
+                self.sender.sendMessage('فیدهای این موضوع به اتمام رسید\n/start برای ادامه مجددا شروع کنید')
                 
             
         if msg['text'] == '/start':
@@ -109,7 +109,7 @@ class Lover(telepot.helper.ChatHandler):
             
             except Exception as e:
                 print(e)
-            self.sender.sendMessage('/more  بیشتر')
+            self.sender.sendMessage('/more  بیشتر\n\n/start  شروع')
             #self.close()
         else:
             self.bot.answerCallbackQuery(query_id, text='Ok. But I am going to keep asking.')
@@ -117,7 +117,7 @@ class Lover(telepot.helper.ChatHandler):
             self._propose()
 
     def on__idle(self, event):
-        self.sender.sendMessage('برای ادامه مجددا شروع کنید /start')
+        #self.sender.sendMessage('برای ادامه مجددا شروع کنید /start')
         self.close()
 
     def on_close(self, ex):
@@ -134,6 +134,6 @@ except:
 bot = telepot.DelegatorBot(TOKEN, [
     include_callback_query_chat_id(
         pave_event_space())(
-            per_chat_id(types=['private']), create_open, Lover, timeout=300),
+            per_chat_id(types=['private']), create_open, Lover, timeout=30),
 ])
 bot.message_loop(run_forever='Listening ...')

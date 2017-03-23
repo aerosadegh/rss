@@ -122,7 +122,7 @@ class Lover(telepot.aio.helper.ChatHandler):
                     await self.sender.sendMessage(c, 
                                                   parse_mode='Markdown',
 						  disable_web_page_preview=True,
-                                                  reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+                                                  )
 
             except Exception as e:
                 print(e)
@@ -135,7 +135,6 @@ class Lover(telepot.aio.helper.ChatHandler):
 
     async def on__idle(self, event):
         #await self.sender.sendMessage('برای ادامه مجددا شروع کنید /start')
-        print('Close! {:}'.format(str(self.id)))
         self.close()
 
     def on_close(self, ex):
