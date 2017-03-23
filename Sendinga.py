@@ -30,6 +30,8 @@ propose_records = dict()
 ke = [InlineKeyboardButton(text='{:}'.format(c[0][6:].replace('گروه','')), callback_data='{:}'.format(i)) for i,c in enumerate(RSSFLink)]
 kE = [[ke[i],ke[i+1]] for i in range(0,len(ke)-1,2)]
 fk = [0,0,0]
+
+
 class Lover(telepot.aio.helper.ChatHandler):
     keyboard = InlineKeyboardMarkup(inline_keyboard=kE)
     
