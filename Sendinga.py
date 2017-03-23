@@ -4,7 +4,7 @@ from telepot import message_identifier, glance
 from emoji import emojize
 import telepot.aio
 import telepot.aio.helper
-from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton
+from telepot.namedtuple import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove 	
 from telepot.aio.delegate import (
     per_chat_id, create_open, pave_event_space, include_callback_query_chat_id)
 from tele import RSSFLink
@@ -34,7 +34,11 @@ fk = [0,0,0]
 
 class Lover(telepot.aio.helper.ChatHandler):
     keyboard = InlineKeyboardMarkup(inline_keyboard=kE)
-    
+#    keymore = InlineKeyboardMarkup(inline_keyboard=[
+#                                                   InlineKeyboardButton(text='بیشتر',
+#									callback_data='more')
+#						    ]
+#				  )
     def __init__(self, *args, **kwargs):
         super(Lover, self).__init__(*args, **kwargs)
 
@@ -54,7 +58,16 @@ class Lover(telepot.aio.helper.ChatHandler):
         sent = await self.sender.sendMessage('%d. یکی از موضوعات زیر را انتخاب کنید' % self._count, reply_markup=self.keyboard)
         self._editor = telepot.aio.helper.Editor(self.bot, sent)
         self._edit_msg_ident = message_identifier(sent)
-		
+        
+    async def _more(self):
+        await self._cancel_last()
+        await self.sender.sendMessage('برای ادامه انتخاب کنید',
+                            reply_markup=ReplyKeyboardMarkup(
+                                keyboard=[
+                                   [KeyboardButton(text="more"), KeyboardButton(text="start")]
+                                ],
+				resize_keyboard=True
+                            ))
 
     async def _cancel_last(self):
         if self._editor:
@@ -64,27 +77,30 @@ class Lover(telepot.aio.helper.ChatHandler):
 
     async def on_chat_message(self, msg):
         global RSSFLink, fk, Feeds
-        if msg['text'] == '/more':
+        await self._cancel_last()
+        if msg['text'] == 'more':
             ff = Feeds[fk[0]][fk[1]:fk[1]+5]
             fk[1] = fk[1]+5
             try:
                 for i,c in enumerate(ff):
                     c = em(str(i+fk[1]-5) + c).replace('_','-')
+                    sleep(2)
                     await self.sender.sendMessage(c, 
                                                   parse_mode='Markdown',
-						disable_web_page_preview=True,
-                                                  )
-                    sleep(2)
-            
+						  disable_web_page_preview=True,
+                                                  reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+
             except Exception as e:
                 print(e)
-            if i+fk[1]-5 < fk[2]-2:
-                await self.sender.sendMessage('/more  بیشتر')
+            if i+fk[1]-5 < fk[2]-2-10:
+                await self._more()
             else:
-                await self.sender.sendMessage('فیدهای این موضوع به اتمام رسید\n برای ادامه مجددا شروع کنید /start')
+                await self.sender.sendMessage('فیدهای این موضوع به اتمام رسید\n برای ادامه مجددا شروع کنید')
                 
             
-        if msg['text'] == '/start':
+        if msg['text'] in ['start', '/start']:
+            if msg['text']  == 'start': 
+                await self.sender.sendMessage('در حال انجام...', reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
             await self._propose()
 #        else:
 #            if fk[1]>=fk[2]:
@@ -96,21 +112,21 @@ class Lover(telepot.aio.helper.ChatHandler):
         if query_data is not '/more':
             from tele import Feeds
             await self._cancel_last()
-            await self.sender.sendMessage(RSSFLink[int(query_data)][0]+em(Feeds[int(query_data)][0]))
+            await self.sender.sendMessage(RSSFLink[int(query_data)][0]+em(Feeds[int(query_data)][0]),reply_markup=ReplyKeyboardRemove())
             ff = Feeds[int(query_data)][1:6]
             fk = [int(query_data), 6 , len(Feeds[int(query_data)]) ]
             try:
                 for c in ff:
                     c = em(c).replace('_','-')
+                    sleep(2)
                     await self.sender.sendMessage(c, 
                                                   parse_mode='Markdown',
-						disable_web_page_preview=True,
-                                                  )
-                    sleep(2)
-            
+						  disable_web_page_preview=True,
+                                                  reply_markup=ReplyKeyboardRemove(remove_keyboard=True))
+
             except Exception as e:
                 print(e)
-            await self.sender.sendMessage('/more  بیشتر')
+            await self._more()
             #self.close()
         else:
             await self.bot.answerCallbackQuery(query_id, text='Ok. But I am going to keep asking.')
@@ -118,7 +134,8 @@ class Lover(telepot.aio.helper.ChatHandler):
             await self._propose()
 
     async def on__idle(self, event):
-        await self.sender.sendMessage('برای ادامه مجددا شروع کنید /start')
+        #await self.sender.sendMessage('برای ادامه مجددا شروع کنید /start')
+        print('Close! {:}'.format(str(self.id)))
         self.close()
 
     def on_close(self, ex):
